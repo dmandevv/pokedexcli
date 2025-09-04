@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
-	"github.com/dmandevv/pokedexcli/internal/pokecache"
 )
 
 type LocationList struct {
@@ -18,14 +16,19 @@ type LocationList struct {
 	} `json:"results"`
 }
 
-func (c Client) GetLocationsList(pageURL *string, cache *pokecache.Cache) (LocationList, error) {
+func (c Client) GetLocationsList(pageURL *string) (LocationList, error) {
 	url := baseURL + "/location-area"
 	if pageURL != nil {
 		url = *pageURL
 	}
 
-	if data, found := cache.Get(url); found {
-		return data.(LocationList), nil
+	if data, found := c.cache.Get(url); found {
+		locations := LocationList{}
+		err := json.Unmarshal(data, &locations)
+		if err != nil {
+			return locations, err
+		}
+		return locations, nil
 	}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -50,6 +53,6 @@ func (c Client) GetLocationsList(pageURL *string, cache *pokecache.Cache) (Locat
 		return LocationList{}, err
 	}
 
-	cache.Add(url, locations)
+	c.cache.Add(url, data)
 	return locations, nil
 }

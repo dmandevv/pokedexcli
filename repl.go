@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/dmandevv/pokedexcli/internal/pokeapi"
-	"github.com/dmandevv/pokedexcli/internal/pokecache"
 )
 
 type config struct {
@@ -16,7 +15,7 @@ type config struct {
 	previousLocationsURL *string
 }
 
-func startRepl(cfg *config, cache *pokecache.Cache) {
+func startRepl(cfg *config) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Pokedex > ")
@@ -25,10 +24,13 @@ func startRepl(cfg *config, cache *pokecache.Cache) {
 		if len(cleanText) == 0 {
 			continue
 		}
-
+		param := ""
+		if len(cleanText) > 1 {
+			param = cleanText[1]
+		}
 		command, exists := getCommands()[cleanText[0]]
 		if exists {
-			err := command.callback(cfg, cache)
+			err := command.callback(cfg, param)
 			if err != nil {
 				fmt.Println("Error:", err)
 			}
@@ -49,20 +51,20 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config, *pokecache.Cache) error
+	callback    func(*config, string) error
 }
 
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
-		"exit": {
-			name:        "exit",
-			description: "Exit the Pokedex",
-			callback:    commandExit,
-		},
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
 			callback:    commandHelp,
+		},
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
 		},
 		"map": {
 			name:        "map",
@@ -73,6 +75,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "Displays previous 20 areas",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "List all pokemon in a specific area",
+			callback:    commandExplore,
 		},
 	}
 }

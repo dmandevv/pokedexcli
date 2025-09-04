@@ -3,11 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-
-	"github.com/dmandevv/pokedexcli/internal/pokecache"
 )
 
-func commandMapf(cfg *config, cache *pokecache.Cache) error {
+func commandMapf(cfg *config, args string) error {
 
 	locations, err := cfg.pokeapiClient.GetLocationsList(cfg.nextLocationsURL)
 	if err != nil {
@@ -24,7 +22,7 @@ func commandMapf(cfg *config, cache *pokecache.Cache) error {
 	return nil
 }
 
-func commandMapb(cfg *config, cache *pokecache.Cache) error {
+func commandMapb(cfg *config, args string) error {
 	if cfg.previousLocationsURL == nil {
 		return errors.New("you're on the first page")
 	}
