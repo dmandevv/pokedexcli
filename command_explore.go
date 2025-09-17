@@ -1,12 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
-func commandExplore(cfg *config, area_name string) error {
+func commandExplore(cfg *config, args ...string) error {
 
-	area, err := cfg.pokeapiClient.GetAreaPokemonList(area_name)
+	if len(args) == 0 || args[0] == "" {
+		return errors.New("please provide an area name. Usage: explore <area-name>")
+	}
+
+	area, err := cfg.pokeapiClient.GetAreaPokemonList(args[0])
 	if err != nil {
 		return err
 	}
